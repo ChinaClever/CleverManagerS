@@ -20,4 +20,6 @@ SOURCES += \
    
 
 HEADERS  += \
+    $$PWD/event.h \
+    $$PWD/im.h
     

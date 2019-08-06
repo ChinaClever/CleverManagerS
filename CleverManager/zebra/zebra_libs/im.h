@@ -2,6 +2,7 @@
 #define __H_ZEBRA_IM_H__
 
 #include <string>
+#include "event.h"
 
 //#include "peersafe/imapi/event.h"
 //#include "peersafe/core/rate.h"
@@ -25,7 +26,7 @@ public:
 	virtual int service_threads() = 0;
 	
 	// handle events
-	virtual void onEvent(eventCode code, event* evn) = 0;
+        virtual void onEvent(eventCode code, event* evn) = 0;
 protected:
 	client() {}
 };
@@ -48,7 +49,7 @@ public:
 	// post a event using for getting data 
 	// where client::onEvent would handle an event
 	int postEvent(peersafe::imapi::eventCode event);
-	void enable_rate(peersafe::core::rate* rate);
+//    void enable_rate(peersafe::core::rate* rate);
 	
 private:
 	im_impl *impl_;

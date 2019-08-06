@@ -1,15 +1,19 @@
 #ifndef ZEBRA_PEER_H
 #define ZEBRA_PEER_H
-#include "im.h"
-#include "event.h"
+#include "zebra_client.h"
 
-using namespace peersafe;
-using namespace imapi;
-
-class Zebra_Peer : public im
+class Zebra_Peer //: public im
 {
+    Zebra_Peer(Zebra_Client *client);
 public:
-    Zebra_Peer();
+
+//    bool startZebra();
+//    void stopZebra();
+//    int send(const QString &id, uchar *buf, int len);
+
+private:
+    bool isRun;
+    Zebra_Client *mClient;
 };
 
 #endif // ZEBRA_PEER_H
