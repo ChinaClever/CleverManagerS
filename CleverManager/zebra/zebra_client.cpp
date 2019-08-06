@@ -62,10 +62,12 @@ void Zebra_Client::handleCreateChannelEvent(channelEvent* evn)
 
 void Zebra_Client::handleConnectPeerEvent(connectEvent* evn)
 {
+    Zebra_DataPacket *dp = Zebra_DataPacket::bulid();
     if (evn->error_code()) {
+        dp->dhtStatus = false;
         qDebug() << "DHT connected err";
-    }
-    else {
+    } else {
+        dp->dhtStatus = true;
         qDebug() << "DHT connected ok";
     }
 }
@@ -82,12 +84,16 @@ void Zebra_Client::handleAllowEvent(allowEvent* evn)
 {
     QString join_id = QString::fromStdString(evn->join_channel());
     QString channel_id = QString::fromStdString(evn->chat_channel());
+
+
+    ////////////
 }
 
 void Zebra_Client::handleDisAllowEvent(disAllowEvent* evn)
 {
     QString join_id = QString::fromStdString(evn->join_channel());
 
+    ////////////////
 }
 
 

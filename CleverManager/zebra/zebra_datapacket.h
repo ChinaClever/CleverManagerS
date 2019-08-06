@@ -18,14 +18,15 @@ struct sZebraNode
 
 class Zebra_DataPacket
 {
-     Zebra_DataPacket();
+    Zebra_DataPacket();
 public:
     static Zebra_DataPacket *bulid();
 
+    bool dhtStatus; // 分布区网络
 
 
 private:
-
+    QHash<QString, sZebraNode> mHash;
 };
 
 #endif // ZEBRA_DATAPACKET_H

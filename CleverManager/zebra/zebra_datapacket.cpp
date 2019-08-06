@@ -1,8 +1,8 @@
 #include "zebra_datapacket.h"
 
-Zebra_DataPacket::Zebra_DataPacket() : QObject(parent)
+Zebra_DataPacket::Zebra_DataPacket()
 {
-
+    dhtStatus = false;
 }
 
 Zebra_DataPacket *Zebra_DataPacket::bulid()
