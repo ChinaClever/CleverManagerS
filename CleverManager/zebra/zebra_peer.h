@@ -1,19 +1,23 @@
 #ifndef ZEBRA_PEER_H
 #define ZEBRA_PEER_H
-#include "zebra_client.h"
+#include "zebra_udpsocket.h"
 
-class Zebra_Peer //: public im
+class Zebra_Peer : public QObject
 {
-    Zebra_Peer(Zebra_Client *client);
+    Q_OBJECT
+    explicit Zebra_Peer(QObject *parent = nullptr);
 public:
+    static Zebra_Peer *bulid(QObject *parent = nullptr);
 
-//    bool startZebra();
-//    void stopZebra();
-//    int send(const QString &id, uchar *buf, int len);
+    QString getDhtStatus();
+    QString getStatus(const QString &ip);
+    int send(const QString &ip, uchar *buf, int len);
 
 private:
-    bool isRun;
+    Zebra_Im *mIm;
     Zebra_Client *mClient;
+    Zebra_UdpSocket *mUdp;
+    Zebra_JoinThread *mJoin;
 };
 
 #endif // ZEBRA_PEER_H

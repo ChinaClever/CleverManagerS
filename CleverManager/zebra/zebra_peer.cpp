@@ -6,38 +6,51 @@
  */
 #include "zebra_peer.h"
 
-Zebra_Peer::Zebra_Peer(Zebra_Client *client) //:im(client)
+
+Zebra_Peer::Zebra_Peer(QObject *parent) : QObject(parent)
 {
-    isRun = false;
+    mClient = new Zebra_Client;
+    mClient->setBootstrapNodes("192.168.1.207:37053");
+
+    mIm = Zebra_Im::bulid(mClient);
+    mIm->startZebra();
+
+    mUdp = new Zebra_UdpSocket(this);
+    mJoin = new Zebra_JoinThread(this);
 }
 
-//bool Zebra_Peer::startZebra()
-//{
-//    if(!isRun) {
-//        start();
-//        isRun = true;
-//    }
+Zebra_Peer *Zebra_Peer::bulid(QObject *parent)
+{
+    static Zebra_Peer* sington = nullptr;
+    if(sington == nullptr)
+        sington = new Zebra_Peer(parent);
 
-//    return isRun;
-//}
+    return sington;
+}
 
+int Zebra_Peer::send(const QString &ip, uchar *buf, int len)
+{
+    int ret = 0;
+    QStringList ids  = Zebra_DataPacket::bulid()->getChannel(ip);
+    for(int i=0; i<ids.size(); ++i) {
+        ret = mIm->send(ids.at(i), buf, len);;
+    }
 
-//void Zebra_Peer::stopZebra()
-//{
-//    if(isRun) {
-//        stop();
-//        isRun = false;
-//    }
-//}
+    return ret;
+}
 
+QString Zebra_Peer::getStatus(const QString &ip)
+{
+    return Zebra_DataPacket::bulid()->getStatus(ip);
+}
 
-//int Zebra_Peer::send(const QString &id, uchar *buf, int len)
-//{
-//    int ret = 0;
-//    if(isRun) {
-//        std::string data((char*)buf,len);
-//        ret = send_message(id.toStdString(), data);
-//    }
+QString Zebra_Peer::getDhtStatus()
+{
+    QString ret =  "DHT Err" ;//tr("分布式网络异常");
+    bool status = Zebra_DataPacket::bulid()->dhtStatus;
+    if(status) {
+        ret = "DHT OK"; // tr("分布式网络正常");
+    }
 
-//    return ret;
-//}
+    return ret;
+}

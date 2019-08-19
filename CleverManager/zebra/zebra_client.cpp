@@ -6,33 +6,23 @@
  */
 #include "zebra_client.h"
 
+#define ZEBRA_FN "zebracfg.ini"
+
+#define zebra_tostd(str)    str.toStdString(). c_str()
+#define zebra_fromstd(str)  QString::fromStdString(str.c_str())
+
+
+#include "zebra_peer.h"
+
 Zebra_Client::Zebra_Client()
 {
-    mSql = Zebra_Sql::bulid();
-}
-
-
-void Zebra_Client::key_pair(std::string& public_key, std::string& private_key)
-{
-    sZebraSqlItem item = mSql->findById(mBootstrapNodes);
-    if(item.id>=0) {
-        public_key = item.public_key.toStdString();
-        private_key = item.private_key.toStdString();
-    } else {
-        qDebug() << "read node key fail.";
-    }
+    mZebraData = Zebra_DataPacket::bulid();
 }
 
 
 void Zebra_Client::handleBootstrapEvent(bootstrapEvent *evn)
 {
-    mBootstrapNodes = QString::fromStdString(evn->node_id());
-
-    sZebraSqlItem item;
-    item.node_id = QString::fromStdString(evn->node_id());
-    item.public_key = QString::fromStdString(evn->key().Publick);
-    item.private_key = QString::fromStdString(evn->key().Private);
-    mSql->updateItem(item);
+    mNodeId = evn->node_id();
 }
 
 
@@ -44,18 +34,9 @@ void Zebra_Client::handleGetDHTNodesEvent(dhtNodeEvent *evn) {
 
 void Zebra_Client::handleCreateChannelEvent(channelEvent* evn)
 {
-    if(peersafe::imapi::channelType::CH_CHAT == evn->getChannel().type())
-    {
-        sZebraSqlItem item;
-        std::string str = evn->getChannel().channel_id();
-        item.node_id = QString::fromStdString(str);
-
-        str = evn->getChannel().key().Publick;
-        item.public_key = QString::fromStdString(str);
-
-        str = evn->getChannel().key().Private;
-        item.private_key = QString::fromStdString(str);
-        mSql->updateItem(item);
+    channel ch =  evn->getChannel();
+    if(channelType::CH_CHAT == ch.type()) {
+//        qDebug() << "zebra create channel " << ch.channel_id().c_str();
     }
 }
 
@@ -68,57 +49,57 @@ void Zebra_Client::handleConnectPeerEvent(connectEvent* evn)
         qDebug() << "DHT connected err";
     } else {
         dp->dhtStatus = true;
-        qDebug() << "DHT connected ok";
+//        qDebug() << "DHT connected ok";
     }
 }
 
 
 void Zebra_Client::handleJoinChannelEvent(joinEvent* evn)
 {
-    //	evn->reason("welcome to here");
+    evn->reason("welcome to here");
     evn->allow(true);
 }
 
 
 void Zebra_Client::handleAllowEvent(allowEvent* evn)
 {
-    QString join_id = QString::fromStdString(evn->join_channel());
-    QString channel_id = QString::fromStdString(evn->chat_channel());
-
-
-    ////////////
+    QString join_id = zebra_fromstd(evn->join_channel());
+    QString channel_id = zebra_fromstd(evn->chat_channel());
+    mZebraData->setChannel(join_id, channel_id);
 }
 
 void Zebra_Client::handleDisAllowEvent(disAllowEvent* evn)
 {
-    QString join_id = QString::fromStdString(evn->join_channel());
-
-    ////////////////
+    QString join_id = zebra_fromstd(evn->join_channel());
+    mZebraData->setJoinFailed(join_id);
 }
-
-
 
 void Zebra_Client::handleMessageEvent(messageEvent* evn)
 {
-    char rcv[256] = {0};
-    QString from = QString::fromStdString(evn->from());
-    QString id = QString::fromStdString(evn->channel());
+    static char rcv[512] = {0};
+
+    QString from = zebra_fromstd(evn->from());
+    QString id = zebra_fromstd(evn->channel());
 
     std::string data =  evn->data();
     int len = data.length();
     memcpy(rcv, data.c_str(), len);
-    QByteArray ba(rcv, len);
+    QByteArray ba(rcv, len);    
+    QString ip = mZebraData->getIp(from, id);
 
+    qDebug() << ip << ba;
 
+    Zebra_Peer *peer = Zebra_Peer::bulid();
+    peer->send(ip, (uchar *)rcv, len);
 }
 
 
 void Zebra_Client::handleReplyEvent(replyEvent* evn)
 {
     qDebug() << "Zebra A reply "
-        << "  errorCode: " << evn->errorCode()
-        << "  originator: " << evn->originatorType()
-        << "  channel: " << QString::fromStdString(evn->channel()) ;
+             << "  errorCode: " << evn->errorCode()
+             << "  originator: " << evn->originatorType()
+             << "  channel: " << zebra_fromstd(evn->channel()) ;
 }
 
 
@@ -126,14 +107,13 @@ void Zebra_Client::handleReplyEvent(replyEvent* evn)
 void Zebra_Client::handleNotifyEvent(notifyEvent* evn)
 {
     qDebug() << "Zebra A notify \n"
-        << "  channel: " << QString::fromStdString(evn->channel())
-        << "  reason: " << evn->reason();
+             << "  channel: " << zebra_fromstd(evn->channel())
+             << "  reason: " << evn->reason();
 }
 
 
 void Zebra_Client::handleLoadChEvent(localChannel* evn)
 {
-//    db_.get_channels(e);
 }
 
 

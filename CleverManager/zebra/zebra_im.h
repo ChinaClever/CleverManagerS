@@ -5,13 +5,14 @@
 
 class Zebra_Im : public im
 {
+    Zebra_Im(Zebra_Client *c);
 public:
-     Zebra_Im(Zebra_Client *client);
-     ~Zebra_Im();
+    ~Zebra_Im();
+    static Zebra_Im *bulid(Zebra_Client *c = nullptr);
 
-     bool startZebra();
-     void stopZebra();
-     int send(const QString &id, uchar *buf, int len);
+    bool startZebra();
+    void stopZebra();
+    int send(const QString &id, uchar *buf, int len);
 
 private:
     bool isRun;
