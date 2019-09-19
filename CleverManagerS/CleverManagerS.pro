@@ -10,7 +10,7 @@ QT       += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = CleverManager
+TARGET = CleverManagerS
 TEMPLATE = app
 
 # The following define makes your compiler emit warnings if you use
@@ -25,7 +25,6 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 include(zebra/zebra.pri)
-include(common/common.pri)
 
 
 SOURCES += \
